@@ -1,0 +1,42 @@
+# Build output
+target/
+*.jar
+*.war
+*.class
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Eclipse
+.classpath
+.project
+.settings/
+.factorypath
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Sensitive files - NEVER COMMIT
+*.pem
+*.key
+*.env
+.env
+.env.*
+application-prod.properties
+application-prod.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp

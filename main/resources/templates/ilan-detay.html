@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlan Detayı</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f0f2f5; }
+        .detail-img { max-height: 500px; object-fit: contain; background: #fff; width: 100%; border-radius: 10px;}
+        .price-tag { font-size: 2.5rem; color: #2ecc71; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+        <a class="navbar-brand fw-bold" href="/">Fiyat Tahmin</a>
+        <div class="ms-auto d-flex align-items-center">
+            <a href="/" class="btn btn-outline-light btn-sm me-3">
+                <i class="bi bi-arrow-left"></i> Listeye Dön
+            </a>
+            <span class="text-white me-3">Hoş geldin, <span th:text="${aktifKullanici}">Kullanıcı</span></span>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        <div class="row bg-white shadow rounded p-4">
+            
+            <div class="col-md-6 mb-4">
+                <div class="border rounded p-2 text-center bg-light">
+                    <img th:if="${ilan.resimYolu != null}" th:src="@{'/images/' + ${ilan.resimYolu}}" class="detail-img shadow-sm" alt="Ürün Resmi">
+                    <i th:unless="${ilan.resimYolu != null}" class="bi bi-camera text-muted" style="font-size: 10rem;"></i>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold" th:text="${ilan.kategori}">Kategori</small>
+                        <div class="text-primary mt-1">
+                            <i class="bi bi-geo-alt-fill"></i> 
+                            <span th:text="${ilan.sehir} + ' / ' + ${ilan.ilce}">İstanbul / Kadıköy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h1 class="fw-bold mt-2" th:text="${ilan.baslik}">İlan Başlığı</h1>
+                
+                <div class="price-tag my-3" th:text="${ilan.fiyat} + ' TL'">1000 TL</div>
+
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Satıcı Bilgileri</h5>
+                        <p class="mb-1">
+                            <i class="bi bi-person-circle me-2"></i>
+                            <span th:text="${ilan.kullanici != null ? ilan.kullanici.adSoyad : 'Bilinmiyor'}">Ad Soyad</span>
+                        </p>
+                        <p class="mb-0 text-muted small">
+                            Kullanıcı Adı: <span th:text="${ilan.kullanici != null ? ilan.kullanici.kullaniciAdi : '-'}">@kullanici</span>
+                        </p>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold">Açıklama</h5>
+                <p class="text-secondary" th:text="${ilan.aciklama}">
+                    Ürün açıklaması burada yer alacak...
+                </p>
+
+                <hr>
+
+                <div class="card mb-4 border-0 shadow-sm" th:if="${ilan.sehir != null}">
+                    <div class="card-header bg-white fw-bold">
+                        <i class="bi bi-map"></i> Konum
+                    </div>
+                    <div class="card-body p-0">
+                        <iframe 
+                            width="100%" 
+                            height="300" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy"
+                            th:src="@{'https://maps.google.com/maps?q=' + ${ilan.adres} + ' ' + ${ilan.ilce} + ' ' + ${ilan.sehir} + '&t=&z=15&ie=UTF8&iwloc=&output=embed'}">
+                        </iframe>
+                        <div class="p-2 small text-muted bg-light">
+                            <i class="bi bi-pin-map-fill"></i> Adres: <span th:text="${ilan.adres} + ', ' + ${ilan.ilce} + '/' + ${ilan.sehir}">Adres</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2">
+                    <div th:if="${ilan.kullanici != null and ilan.kullanici.kullaniciAdi == aktifKullanici}" class="d-grid gap-2">
+                        <a th:href="@{/ilan-duzenle(id=${ilan.id})}" class="btn btn-warning btn-lg">
+                            <i class="bi bi-pencil-square"></i> İlanı Düzenle
+                        </a>
+                        <a th:href="@{/ilan-sil(id=${ilan.id})}" class="btn btn-danger" onclick="return confirm('Bu ilanı silmek istediğinize emin misiniz?');">
+                            <i class="bi bi-trash"></i> İlanı Sil
+                        </a>
+                    </div>
+
+                    <div th:unless="${ilan.kullanici != null and ilan.kullanici.kullaniciAdi == aktifKullanici}">
+                        <form action="/mesaj-gonder" method="post">
+                            <input type="hidden" name="aliciId" th:value="${ilan.kullanici.id}">
+                            <input type="hidden" name="ilanId" th:value="${ilan.id}">
+                            <div class="mb-3">
+                                <textarea name="icerik" class="form-control" rows="2" placeholder="Satıcıya bir mesaj yaz..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-send-fill"></i> Mesaj Gönder
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

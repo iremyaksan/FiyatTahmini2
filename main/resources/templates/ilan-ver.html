@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni İlan Oluştur</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                        <h3 class="mb-0">📢 Yeni İlan Oluştur</h3>
+                    </div>
+                    <div class="card-body p-5">
+                        
+                        <form action="/ilan-kaydet" method="post" enctype="multipart/form-data">
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">İlan Başlığı</label>
+                                <input type="text" name="baslik" class="form-control form-control-lg" placeholder="Örn: Temiz iPhone 13, Hatasız Boyasız" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">Fiyat (TL)</label>
+                                    <input type="number" name="fiyat" class="form-control" placeholder="0.00" required>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">Kategori</label>
+                                    <select name="kategori" class="form-select">
+                                        <option value="EMLAK">Emlak / Konut</option>
+                                        <option value="VASITA">Vasıta / Araç</option>
+                                        <option value="ELEKTRONIK">Elektronik</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">Şehir</label>
+                                    <input type="text" name="sehir" class="form-control" placeholder="Örn: İstanbul" required>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">İlçe</label>
+                                    <input type="text" name="ilce" class="form-control" placeholder="Örn: Kadıköy" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Açık Adres / Mahalle</label>
+                                <textarea name="adres" class="form-control" rows="2" placeholder="Örn: Caferağa Mah. Moda Cad. No:5"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Açıklama</label>
+                                <textarea name="aciklama" class="form-control" rows="5" placeholder="Ürünün detaylarını buraya yazın..."></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Fotoğraf Ekle</label>
+                                <input type="file" name="resim" class="form-control">
+                                <div class="form-text">Şimdilik tek bir ana resim seçiniz.</div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">🚀 İlanı Yayınla</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="/" class="text-decoration-none text-muted">← Panele Dön</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
