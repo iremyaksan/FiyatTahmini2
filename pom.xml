@@ -134,11 +134,19 @@
 	</dependencies>
 
 <build>
+    <sourceDirectory>main/java</sourceDirectory>
+    <resources>
+        <resource>
+            <directory>main/resources</directory>
+        </resource>
+    </resources>
+    <testSourceDirectory>test/java</testSourceDirectory>
     <plugins>
         <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
             <configuration>
+                <mainClass>com.ornek.fiyattahmin.FiyatTahminApplication</mainClass>
                 <excludes>
                     <exclude>
                         <groupId>org.projectlombok</groupId>
