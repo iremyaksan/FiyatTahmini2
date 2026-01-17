@@ -81,20 +81,28 @@ jobs:
           
           echo "=== Starting application: $JAR_FILE ==="
           
-          # Start application with explicit Spring profile
-          nohup java -jar "$JAR_FILE" --spring.profiles.active=prod > app.log 2>&1 &
+          # Start application (no profile - use default settings)
+          nohup java -jar "$JAR_FILE" > app.log 2>&1 &
           APP_PID=$!
           echo "Application PID: $APP_PID"
           
-          # Wait for startup
-          echo "Waiting 25 seconds for startup..."
-          sleep 25
+          # Wait for startup and show progress
+          echo "Waiting for startup..."
+          for i in 1 2 3 4 5 6; do
+            sleep 5
+            echo "--- Check $i (after $((i*5)) seconds) ---"
+            if ! ps -p $APP_PID > /dev/null 2>&1; then
+              echo "Process died early!"
+              break
+            fi
+            tail -3 app.log 2>/dev/null || true
+          done
           
-          # Check if running
+          # Final check
           if ps -p $APP_PID > /dev/null 2>&1; then
             echo "=== SUCCESS: Application is running! ==="
-            echo "=== Last 10 lines of log ==="
-            tail -10 app.log
+            curl -s http://localhost:8082/actuator/health 2>/dev/null || echo "Health check not available"
+            tail -15 app.log
           else
             echo "=== FAILED: Application crashed ==="
             echo "=== Full application log ==="
