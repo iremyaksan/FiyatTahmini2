@@ -29,8 +29,8 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "target/*.jar"
-        target: "/home/${{ secrets.EC2_USER }}/app"
+        source: "target/FiyatTahmin-0.0.1-SNAPSHOT.jar"
+        target: "/home/${{ secrets.EC2_USER }}"
         strip_components: 1
     
     - name: Deploy on EC2
@@ -39,43 +39,65 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        command_timeout: 120s
+        command_timeout: 180s
         script: |
-          set -e
+          echo "=== DEBUG: Starting deployment ==="
+          echo "Current user: $(whoami)"
+          echo "Home directory: $HOME"
           
-          # Go to app directory
-          cd /home/${{ secrets.EC2_USER }}/app
+          # List home directory to see what was copied
+          echo "=== Contents of home directory ==="
+          ls -la $HOME/
+          
+          # Create app directory if not exists
+          mkdir -p $HOME/app
+          
+          # Move JAR to app directory
+          if [ -f "$HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar" ]; then
+            echo "Found JAR in home, moving to app directory"
+            mv $HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar $HOME/app/
+          fi
+          
+          # List app directory
+          echo "=== Contents of app directory ==="
+          ls -la $HOME/app/
+          
+          cd $HOME/app
           
           # Stop existing application
-          pkill -f 'java -jar' || true
+          echo "=== Stopping existing application ==="
+          pkill -f 'java -jar' || echo "No running Java process found"
           sleep 3
-          
-          # Remove old JAR and keep only new one
-          rm -f /home/${{ secrets.EC2_USER }}/app/*.jar.old 2>/dev/null || true
           
           # Find the JAR file
           JAR_FILE=$(ls -t *.jar 2>/dev/null | head -1)
           
           if [ -z "$JAR_FILE" ]; then
-            echo "ERROR: No JAR file found!"
-            ls -la
+            echo "ERROR: No JAR file found in $HOME/app!"
+            echo "=== Searching for JAR files everywhere ==="
+            find $HOME -name "*.jar" -type f 2>/dev/null || echo "No JAR found"
             exit 1
           fi
           
-          echo "Starting: $JAR_FILE"
+          echo "=== Starting application: $JAR_FILE ==="
           
-          # Start application
-          nohup java -jar "$JAR_FILE" > app.log 2>&1 &
+          # Start application with explicit Spring profile
+          nohup java -jar "$JAR_FILE" --spring.profiles.active=prod > app.log 2>&1 &
+          APP_PID=$!
+          echo "Application PID: $APP_PID"
           
           # Wait for startup
-          sleep 20
+          echo "Waiting 25 seconds for startup..."
+          sleep 25
           
           # Check if running
-          if pgrep -f 'java -jar' > /dev/null; then
-            echo "SUCCESS: Application started!"
-            tail -5 app.log
+          if ps -p $APP_PID > /dev/null 2>&1; then
+            echo "=== SUCCESS: Application is running! ==="
+            echo "=== Last 10 lines of log ==="
+            tail -10 app.log
           else
-            echo "FAILED: Application did not start"
-            tail -50 app.log
+            echo "=== FAILED: Application crashed ==="
+            echo "=== Full application log ==="
+            cat app.log
             exit 1
           fi
