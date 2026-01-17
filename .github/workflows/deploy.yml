@@ -39,22 +39,22 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
+        command_timeout: 60s
         script: |
           # Stop existing application
           pkill -f 'java -jar' || true
-          
-          # Wait for process to stop
           sleep 3
           
           # Start new application
           cd /home/${{ secrets.EC2_USER }}/app
-          nohup java -jar *.jar --spring.profiles.active=prod > app.log 2>&1 &
+          nohup java -jar *.jar > app.log 2>&1 &
           
           # Verify application started
-          sleep 10
+          sleep 15
           if pgrep -f 'java -jar' > /dev/null; then
             echo "Application started successfully!"
           else
             echo "Failed to start application"
+            cat app.log
             exit 1
           fi
