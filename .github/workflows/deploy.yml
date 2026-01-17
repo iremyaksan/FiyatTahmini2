@@ -40,84 +40,63 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         command_timeout: 180s
-        script_stop: false
         script: |
-          echo "=== DEBUG: Starting deployment ==="
-          echo "Current user: $(whoami)"
-          echo "Home directory: $HOME"
+          echo "=== Starting deployment ==="
           
-          # List home directory to see what was copied
-          echo "=== Contents of home directory ==="
-          ls -la $HOME/
-          
-          # Create app directory if not exists
+          # Create app directory
           mkdir -p $HOME/app
           
           # Move JAR to app directory
           if [ -f "$HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar" ]; then
-            echo "Found JAR in home, moving to app directory"
+            echo "Moving JAR to app directory..."
             mv $HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar $HOME/app/
           fi
           
-          # List app directory
-          echo "=== Contents of app directory ==="
-          ls -la $HOME/app/
-          
           cd $HOME/app
           
-          # Stop existing application safely using PID file
-          echo "=== Stopping existing application ==="
+          # Create deployment script on EC2
+          cat > deploy.sh << 'DEPLOY_SCRIPT'
+          #!/bin/bash
+          cd $HOME/app
+          
+          # Kill old process if PID file exists
           if [ -f app.pid ]; then
             OLD_PID=$(cat app.pid)
-            echo "Found old PID: $OLD_PID"
-            kill $OLD_PID 2>/dev/null || echo "Process $OLD_PID not running"
+            kill $OLD_PID 2>/dev/null && echo "Killed old process $OLD_PID" || echo "Old process already stopped"
             rm -f app.pid
-          else
-            echo "No PID file found, checking for running processes"
-            # Only kill our specific JAR, not all java processes
-            pgrep -f "FiyatTahmin" && pkill -f "FiyatTahmin" || echo "No FiyatTahmin process found"
+            sleep 2
           fi
-          sleep 3
           
-          # Find the JAR file
+          # Find JAR file
           JAR_FILE=$(ls -t *.jar 2>/dev/null | head -1)
-          
           if [ -z "$JAR_FILE" ]; then
-            echo "ERROR: No JAR file found in $HOME/app!"
-            echo "=== Searching for JAR files everywhere ==="
-            find $HOME -name "*.jar" -type f 2>/dev/null || echo "No JAR found"
+            echo "ERROR: No JAR file found!"
             exit 1
           fi
           
-          echo "=== Starting application: $JAR_FILE ==="
-          
-          # Start application
+          echo "Starting $JAR_FILE..."
           nohup java -jar "$JAR_FILE" > app.log 2>&1 &
-          APP_PID=$!
-          echo $APP_PID > app.pid
-          echo "Application PID: $APP_PID (saved to app.pid)"
+          echo $! > app.pid
+          echo "Started with PID $(cat app.pid)"
+          DEPLOY_SCRIPT
           
-          # Wait for startup and show progress
-          echo "Waiting for startup..."
-          for i in 1 2 3 4 5 6; do
-            sleep 5
-            echo "--- Check $i (after $((i*5)) seconds) ---"
-            if ! ps -p $APP_PID > /dev/null 2>&1; then
-              echo "Process died early!"
-              break
-            fi
-            tail -3 app.log 2>/dev/null || true
-          done
+          chmod +x deploy.sh
           
-          # Final check
-          if ps -p $APP_PID > /dev/null 2>&1; then
+          # Run deployment in background and wait
+          echo "=== Running deployment script ==="
+          ./deploy.sh
+          
+          # Wait for startup
+          echo "=== Waiting for application startup ==="
+          sleep 20
+          
+          # Check status
+          if [ -f app.pid ] && ps -p $(cat app.pid) > /dev/null 2>&1; then
             echo "=== SUCCESS: Application is running! ==="
-            tail -15 app.log
-            exit 0
+            tail -20 app.log
           else
-            echo "=== FAILED: Application crashed ==="
-            echo "=== Full application log ==="
-            cat app.log
+            echo "=== FAILED: Application not running ==="
+            cat app.log 2>/dev/null || echo "No log file"
             exit 1
           fi
 
