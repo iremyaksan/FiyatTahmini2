@@ -58,13 +58,14 @@ jobs:
           echo "Setting up Mail Service..."
           cd ~/mail_service
           
-          # Create .env file with mail credentials
-          cat > .env << 'ENVFILE'
-          MAIL_HOST=smtp.gmail.com
-          MAIL_PORT=587
-          MAIL_USER=iremyaksan88@gmail.com
-          MAIL_PASS=othl ygtn ssla hdrt
-          ENVFILE
+          # Create .env file with mail credentials (no leading spaces!)
+          echo "MAIL_HOST=smtp.gmail.com" > .env
+          echo "MAIL_PORT=587" >> .env
+          echo "MAIL_USER=iremyaksan88@gmail.com" >> .env
+          echo "MAIL_PASS=othl ygtn ssla hdrt" >> .env
+          
+          echo "Created .env file:"
+          cat .env
           
           # Create venv if not exists
           if [ ! -d "venv" ]; then
@@ -77,12 +78,17 @@ jobs:
           
           # Kill old mail service
           pkill -f "uvicorn.*main:app" 2>/dev/null || true
-          sleep 1
+          sleep 2
           
           # Start mail service
           nohup venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000 > mail.log 2>&1 &
           echo $! > mail.pid
           echo "Mail service started with PID $(cat mail.pid)"
+          
+          # Test mail service
+          sleep 3
+          echo "Testing mail service..."
+          curl -s http://localhost:8000/ || echo "Mail service not responding"
           
           # ===== SPRING BOOT SETUP =====
           echo "Setting up Spring Boot..."
