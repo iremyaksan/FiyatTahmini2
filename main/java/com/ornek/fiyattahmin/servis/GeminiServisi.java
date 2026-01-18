@@ -15,8 +15,9 @@ import java.util.Map;
 @Service
 public class GeminiServisi {
 
-    // Geçici olarak hardcoded key kullanıyoruz (GitHub Secret sorunu nedeniyle)
-    private String apiKey = "AIzaSyB1i8KKmBbDtubaEgzSv6UdfRQMCRfSeI0";
+    // Bu değer deploy sırasında GitHub Actions tarafından gerçek anahtarla
+    // değiştirilecek
+    private String apiKey = "REPLACE_ME_WITH_REAL_KEY";
 
     @Value("${gemini.api.url}")
     private String apiUrl;
