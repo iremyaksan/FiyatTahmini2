@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,13 +24,24 @@ public class IlanKontrolcusu {
 
     private final IlanDeposu ilanDeposu;
     private final KullaniciDeposu kullaniciDeposu;
-    
-    // Resimlerin kaydedileceği klasör
-    public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/src/main/resources/static/images";
+
+    // Resimlerin kaydedileceği klasör - Production için düzeltildi
+    public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads/images";
 
     public IlanKontrolcusu(IlanDeposu ilanDeposu, KullaniciDeposu kullaniciDeposu) {
         this.ilanDeposu = ilanDeposu;
         this.kullaniciDeposu = kullaniciDeposu;
+    }
+
+    @PostConstruct
+    public void init() {
+        // Uygulama başladığında klasörü oluştur
+        try {
+            Files.createDirectories(Paths.get(UPLOAD_DIRECTORY));
+            System.out.println("✅ Resim klasörü hazır: " + UPLOAD_DIRECTORY);
+        } catch (IOException e) {
+            System.err.println("❌ Resim klasörü oluşturulamadı: " + e.getMessage());
+        }
     }
 
     // --- İLAN KAYDETME (YENİ İLAN) ---
@@ -39,21 +51,20 @@ public class IlanKontrolcusu {
             @RequestParam("fiyat") Double fiyat,
             @RequestParam("kategori") String kategori,
             @RequestParam("aciklama") String aciklama,
-            
+
             // YENİ EKLENEN KONUM PARAMETRELERİ
             @RequestParam("sehir") String sehir,
             @RequestParam("ilce") String ilce,
             @RequestParam("adres") String adres,
 
             @RequestParam("resim") MultipartFile resimDosyasi,
-            Authentication authentication
-    ) throws IOException {
+            Authentication authentication) throws IOException {
 
         String kullaniciAdi = authentication.getName();
         Kullanici satici = kullaniciDeposu.findByKullaniciAdi(kullaniciAdi).orElseThrow();
 
         // Resim Kaydetme İşlemleri
-        String resimAdi = "default.jpg"; 
+        String resimAdi = "default.jpg";
         if (resimDosyasi != null && !resimDosyasi.isEmpty()) {
             resimAdi = UUID.randomUUID() + "_" + resimDosyasi.getOriginalFilename();
             Path dosyaYolu = Paths.get(UPLOAD_DIRECTORY, resimAdi);
@@ -66,12 +77,12 @@ public class IlanKontrolcusu {
         yeniIlan.setFiyat(fiyat);
         yeniIlan.setKategori(kategori);
         yeniIlan.setAciklama(aciklama);
-        
+
         // KONUM BİLGİLERİNİ SET ETME (Burayı unutmuştuk, şimdi ekledik!)
         yeniIlan.setSehir(sehir);
         yeniIlan.setIlce(ilce);
         yeniIlan.setAdres(adres);
-        
+
         yeniIlan.setResimYolu(resimAdi);
         yeniIlan.setKullanici(satici);
 
@@ -98,7 +109,7 @@ public class IlanKontrolcusu {
             return "redirect:/?hata";
         }
         model.addAttribute("ilan", ilan);
-        return "ilan-duzenle"; 
+        return "ilan-duzenle";
     }
 
     // --- İLAN GÜNCELLEME (MEVCUT İLANI DEĞİŞTİRME) ---
@@ -109,23 +120,22 @@ public class IlanKontrolcusu {
             @RequestParam Double fiyat,
             @RequestParam String aciklama,
             @RequestParam String kategori,
-            
+
             // GÜNCELLEME İÇİN DE BU PARAMETRELERİ EKLEDİK
             @RequestParam String sehir,
             @RequestParam String ilce,
             @RequestParam String adres,
 
-            @RequestParam(value = "resim", required = false) MultipartFile yeniResim
-    ) throws IOException {
-        
+            @RequestParam(value = "resim", required = false) MultipartFile yeniResim) throws IOException {
+
         Ilan ilan = ilanDeposu.findById(id).orElseThrow();
-        
+
         // Eğer yeni resim yüklendiyse onu kaydet
         if (yeniResim != null && !yeniResim.isEmpty()) {
             String resimAdi = UUID.randomUUID() + "_" + yeniResim.getOriginalFilename();
             Path dosyaYolu = Paths.get(UPLOAD_DIRECTORY, resimAdi);
             Files.write(dosyaYolu, yeniResim.getBytes());
-            ilan.setResimYolu(resimAdi); 
+            ilan.setResimYolu(resimAdi);
         }
 
         // Bilgileri Güncelle
@@ -133,12 +143,12 @@ public class IlanKontrolcusu {
         ilan.setFiyat(fiyat);
         ilan.setAciklama(aciklama);
         ilan.setKategori(kategori);
-        
+
         // KONUM BİLGİLERİNİ GÜNCELLE
         ilan.setSehir(sehir);
         ilan.setIlce(ilce);
         ilan.setAdres(adres);
-        
+
         ilanDeposu.save(ilan);
         return "redirect:/?guncellendi";
     }
