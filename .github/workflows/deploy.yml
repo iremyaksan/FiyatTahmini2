@@ -58,6 +58,14 @@ jobs:
           echo "Setting up Mail Service..."
           cd ~/mail_service
           
+          # Create .env file with mail credentials
+          cat > .env << 'ENVFILE'
+          MAIL_HOST=smtp.gmail.com
+          MAIL_PORT=587
+          MAIL_USER=iremyaksan88@gmail.com
+          MAIL_PASS=othl ygtn ssla hdrt
+          ENVFILE
+          
           # Create venv if not exists
           if [ ! -d "venv" ]; then
             python3 -m venv venv
