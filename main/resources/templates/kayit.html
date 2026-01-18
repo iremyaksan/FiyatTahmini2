@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,25 +34,36 @@
                     </div>
                     <div class="card-body p-5">
                         
-                        <form action="/kayit" method="post">
+                        <!-- Hata mesajı -->
+                        <div th:if="${param.hata}" class="alert alert-danger text-center">
+                            <span th:if="${hata}" th:text="${hata}">Kayıt sırasında bir hata oluştu!</span>
+                            <span th:unless="${hata}">Kayıt sırasında bir hata oluştu!</span>
+                        </div>
+                        
+                        <!-- Başarı mesajı (kayıt olmuşsa) -->
+                        <div th:if="${param.basarili}" class="alert alert-success text-center">
+                            Kayıt başarılı! Şimdi giriş yapabilirsiniz.
+                        </div>
+                        
+                        <form th:action="@{/kayit}" method="post" th:object="${kullanici}">
                             <div class="mb-3">
                                 <label class="form-label">Ad Soyad</label>
-                                <input type="text" name="adSoyad" class="form-control" placeholder="Örn: Ali Yılmaz" required>
+                                <input type="text" th:field="*{adSoyad}" class="form-control" placeholder="Örn: Ali Yılmaz" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Kullanıcı Adı (Giriş için)</label>
-                                <input type="text" name="kullaniciAdi" class="form-control" placeholder="Örn: ali123" required>
+                                <input type="text" th:field="*{kullaniciAdi}" class="form-control" placeholder="Örn: ali123" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" placeholder="ornek@mail.com" required>
+                                <input type="email" th:field="*{email}" class="form-control" placeholder="ornek@mail.com" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Şifre</label>
-                                <input type="password" name="sifre" class="form-control" placeholder="Güçlü bir şifre seçin" required>
+                                <input type="password" th:field="*{sifre}" class="form-control" placeholder="Güçlü bir şifre seçin" required>
                             </div>
 
                             <div class="d-grid gap-2 mt-4">
