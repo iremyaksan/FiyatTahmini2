@@ -39,46 +39,38 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        command_timeout: 120s
+        timeout: 60s
+        command_timeout: 90s
+        script_stop: false
         script: |
           echo "=== Starting deployment ==="
           
-          # Create app directory
           mkdir -p $HOME/app
           
-          # Move JAR to app directory
-          if [ -f "$HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar" ]; then
-            echo "Moving JAR to app directory..."
-            mv $HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar $HOME/app/
-          fi
+          # Move JAR if exists
+          [ -f "$HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar" ] && mv $HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar $HOME/app/
           
           cd $HOME/app
           
           # Kill old process
           pkill -f "java.*FiyatTahmin" 2>/dev/null || true
-          sleep 3
+          sleep 2
           
-          # Find JAR file
+          # Start application
           JAR_FILE=$(ls -t *.jar 2>/dev/null | head -1)
-          if [ -z "$JAR_FILE" ]; then
-            echo "ERROR: No JAR file found!"
-            exit 1
-          fi
+          [ -z "$JAR_FILE" ] && echo "No JAR!" && exit 1
           
           echo "Starting $JAR_FILE..."
           nohup java -jar "$JAR_FILE" > app.log 2>&1 &
           echo $! > app.pid
-          echo "Started with PID $(cat app.pid)"
           
-          # Wait for startup
-          sleep 20
+          sleep 10
           
-          # Check status
+          # Quick check
           if ps -p $(cat app.pid) > /dev/null 2>&1; then
-            echo "=== SUCCESS: Application is running! ==="
-            tail -15 app.log
+            echo "SUCCESS: PID $(cat app.pid) is running"
           else
-            echo "=== FAILED ==="
-            cat app.log
+            echo "FAILED"
+            tail -30 app.log
             exit 1
           fi
