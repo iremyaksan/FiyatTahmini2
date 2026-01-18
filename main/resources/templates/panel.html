@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kullanıcı Paneli</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
     <style>
-        body { background-color: #f0f2f5; }
+        body {
+            background-color: #f0f2f5;
+        }
+
         .action-card {
             border: none;
             border-radius: 20px;
@@ -15,12 +28,29 @@
             cursor: pointer;
             height: 100%;
         }
-        .action-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
-        .icon-box { font-size: 3rem; margin-bottom: 20px; }
-        .category-btn { transition: all 0.2s; border: none; }
-        .category-btn:hover { opacity: 0.8; transform: scale(1.05); }
+
+        .action-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .icon-box {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .category-btn:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
     </style>
 </head>
+
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
@@ -35,13 +65,13 @@
     </nav>
 
     <div class="container mt-5">
-        
+
         <div th:if="${param.ilanBasarili != null}" class="alert alert-success text-center mb-4 shadow-sm">
             ✅ İlanınız başarıyla yayınlandı!
         </div>
 
         <h2 class="text-center mb-5 fw-bold text-secondary">Ne yapmak istiyorsunuz?</h2>
-        
+
         <div class="row g-4 mb-5">
             <div class="col-md-6">
                 <div class="card action-card bg-white p-5 text-center text-dark shadow-sm">
@@ -61,14 +91,14 @@
                     </div>
                     <h3>Yapay Zeka Fiyat Analizi</h3>
                     <p class="text-muted">Alacağın veya satacağın ürünün gerçek değerini öğren.</p>
-                    <a href="/fiyat-hesapla" class="btn btn-success btn-lg rounded-pill mt-3">Fiyatı Hesapla</a>                
+                    <a href="/fiyat-hesapla" class="btn btn-success btn-lg rounded-pill mt-3">Fiyatı Hesapla</a>
                 </div>
             </div>
         </div>
 
         <div class="mt-5 mb-5">
             <h4 class="mb-3 border-bottom pb-2 text-dark fw-bold text-center">🔥 İlanları Keşfet</h4>
-            
+
             <div class="d-flex justify-content-center flex-wrap gap-2 mb-4 mt-3">
                 <a href="/" class="btn btn-dark rounded-pill px-4 shadow-sm category-btn">
                     <i class="bi bi-grid-fill"></i> Hepsi
@@ -87,58 +117,71 @@
             <div class="row justify-content-center mb-5">
                 <div class="col-md-8">
                     <form action="/" method="get" class="d-flex shadow rounded-pill overflow-hidden bg-white border">
-                        <input type="text" name="arama" class="form-control border-0 p-3 ps-4" 
-                               placeholder="İlan başlığı veya açıklama ara..." 
-                               th:value="${param.arama != null ? param.arama : ''}">
+                        <input type="text" name="arama" class="form-control border-0 p-3 ps-4"
+                            placeholder="İlan başlığı veya açıklama ara..."
+                            th:value="${param.arama != null ? param.arama : ''}">
                         <button type="submit" class="btn btn-primary px-4 fw-bold">
                             <i class="bi bi-search"></i> ARA
                         </button>
-                        <a href="/" class="btn btn-secondary px-3 d-flex align-items-center" 
-                           th:if="${param.arama != null or param.kategori != null}">
+                        <a href="/" class="btn btn-secondary px-3 d-flex align-items-center"
+                            th:if="${param.arama != null or param.kategori != null}">
                             <i class="bi bi-x-lg"></i>
                         </a>
                     </form>
                 </div>
             </div>
 
-            <div th:if="${ilanlar == null or ilanlar.empty}" class="alert alert-info text-center py-4 rounded-4 shadow-sm">
+            <div th:if="${ilanlar == null or ilanlar.empty}"
+                class="alert alert-info text-center py-4 rounded-4 shadow-sm">
                 <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
-                <span th:if="${param.arama != null or param.kategori != null}">Seçilen kriterlere uygun ilan bulunamadı.</span>
-                <span th:if="${param.arama == null and param.kategori == null}">Henüz sistemde hiç ilan yok. İlk ilanı sen ver!</span>
+                <span th:if="${param.arama != null or param.kategori != null}">Seçilen kriterlere uygun ilan
+                    bulunamadı.</span>
+                <span th:if="${param.arama == null and param.kategori == null}">Henüz sistemde hiç ilan yok. İlk ilanı
+                    sen ver!</span>
             </div>
 
             <div class="row" th:if="${ilanlar != null}">
                 <div class="col-md-4 mb-4" th:each="ilan : ${ilanlar}">
                     <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
-                        <div style="height: 220px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; position: relative;">
-                             <span class="badge bg-dark position-absolute top-0 end-0 m-3 opacity-75" th:text="${ilan.kategori}">Kategori</span>
-                             
-							 <img th:if="${ilan.resimYolu != null}" 
-							      th:src="@{'/images/' + ${ilan.resimYolu}}" 
-							      class="card-img-top" 
-							      alt="Ürün Resmi">                          
-								     <i th:unless="${ilan.resimYolu != null}" class="bi bi-camera text-muted" style="font-size: 3rem;"></i>
+                        <div
+                            style="height: 220px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <span class="badge bg-dark position-absolute top-0 end-0 m-3 opacity-75"
+                                th:text="${ilan.kategori}">Kategori</span>
+
+                            <img th:if="${ilan.resimYolu != null}" th:src="@{'/images/' + ${ilan.resimYolu}}"
+                                class="card-img-top" alt="Ürün Resmi">
+                            <i th:unless="${ilan.resimYolu != null}" class="bi bi-camera text-muted"
+                                style="font-size: 3rem;"></i>
                         </div>
-                        
+
                         <div class="card-body">
-                            <h5 class="card-title fw-bold text-truncate" th:text="${ilan.baslik != null ? ilan.baslik : 'Başlıksız'}">İlan Başlığı</h5>
-                            <h6 class="card-subtitle mb-3 text-primary fw-bold fs-4" th:text="${ilan.fiyat} + ' TL'">0 TL</h6>
-                            <p class="card-text text-muted small" th:text="${#strings.abbreviate(ilan.aciklama, 100)}">Açıklama...</p>
+                            <h5 class="card-title fw-bold text-truncate"
+                                th:text="${ilan.baslik != null ? ilan.baslik : 'Başlıksız'}">İlan Başlığı</h5>
+                            <h6 class="card-subtitle mb-3 text-primary fw-bold fs-4" th:text="${ilan.fiyat} + ' TL'">0
+                                TL</h6>
+                            <p class="card-text text-muted small" th:text="${#strings.abbreviate(ilan.aciklama, 100)}">
+                                Açıklama...</p>
                         </div>
                         <div class="card-footer bg-white border-top-0 pb-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <small class="text-muted fw-semibold">
-                                    <i class="bi bi-person-circle"></i> 
-                                    <span th:text="${ilan.kullanici != null ? ilan.kullanici.kullaniciAdi : 'Anonim'}">User</span>
+                                    <i class="bi bi-person-circle"></i>
+                                    <span
+                                        th:text="${ilan.kullanici != null ? ilan.kullanici.kullaniciAdi : 'Anonim'}">User</span>
                                 </small>
 
                                 <div>
-                                    <span th:if="${ilan.kullanici != null and ilan.kullanici.kullaniciAdi == aktifKullanici}">
-                                        <a th:href="@{/ilan-duzenle(id=${ilan.id})}" class="btn btn-sm btn-outline-warning rounded-pill">Düzenle</a>
-                                        <a th:href="@{/ilan-sil(id=${ilan.id})}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Silmek istediğine emin misin?');">Sil</a>
+                                    <span
+                                        th:if="${ilan.kullanici != null and ilan.kullanici.kullaniciAdi == aktifKullanici}">
+                                        <a th:href="@{/ilan-duzenle(id=${ilan.id})}"
+                                            class="btn btn-sm btn-outline-warning rounded-pill">Düzenle</a>
+                                        <a th:href="@{/ilan-sil(id=${ilan.id})}"
+                                            class="btn btn-sm btn-outline-danger rounded-pill"
+                                            onclick="return confirm('Silmek istediğine emin misin?');">Sil</a>
                                     </span>
-                                    
-                                    <a th:href="@{/ilan-detay(id=${ilan.id})}" class="btn btn-sm btn-primary rounded-pill px-3">İncele</a>                            
+
+                                    <a th:href="@{/ilan-detay(id=${ilan.id})}"
+                                        class="btn btn-sm btn-primary rounded-pill px-3">İncele</a>
                                 </div>
                             </div>
                         </div>
@@ -149,4 +192,5 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
