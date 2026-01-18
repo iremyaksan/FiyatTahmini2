@@ -15,27 +15,15 @@ import java.util.Map;
 @Service
 public class GeminiServisi {
 
-    @Value("${gemini.api.key}")
-    private String apiKey;
+    // Bu değer deploy sırasında GitHub Actions tarafından gerçek anahtarla
+    // değiştirilecek
+    private String apiKey = "REPLACE_ME_WITH_REAL_KEY";
 
     @Value("${gemini.api.url}")
     private String apiUrl;
 
-    // Fallback logic for API Key
+    // Fallback logic removed - direct injection at build time
     private String getEffectiveApiKey() {
-        if (apiKey == null || apiKey.trim().isEmpty() || apiKey.startsWith("${")) {
-            String envKey = System.getenv("GEMINI_API_KEY");
-            if (envKey != null && !envKey.isEmpty()) {
-                System.out.println("✅ Using Gemini API Key from Environment Variable");
-                return envKey;
-            }
-            // Try Java System Property as well
-            String propKey = System.getProperty("gemini.api.key");
-            if (propKey != null && !propKey.isEmpty()) {
-                System.out.println("✅ Using Gemini API Key from System Property");
-                return propKey;
-            }
-        }
         return apiKey;
     }
 
