@@ -33,18 +33,29 @@ jobs:
         target: "/home/${{ secrets.EC2_USER }}"
         strip_components: 1
     
+    - name: Copy Mail Service to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "mail_service/*"
+        target: "/home/${{ secrets.EC2_USER }}/mail_service"
+        strip_components: 1
+    
     - name: Deploy on EC2
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        command_timeout: 180s
+        command_timeout: 300s
         script: |
           echo "=== Starting deployment ==="
           
           # Create app directory
           mkdir -p $HOME/app
+          mkdir -p $HOME/mail_service
           
           # Move JAR to app directory
           if [ -f "$HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar" ]; then
@@ -52,6 +63,34 @@ jobs:
             mv $HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar $HOME/app/
           fi
           
+          # ========== MAIL SERVICE SETUP ==========
+          echo "=== Setting up Mail Service ==="
+          cd $HOME/mail_service
+          
+          # Install Python dependencies
+          sudo apt-get update -qq
+          sudo apt-get install -y python3-pip python3-venv -qq
+          
+          # Create virtual environment if not exists
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          
+          # Activate and install dependencies
+          source venv/bin/activate
+          pip install -q fastapi uvicorn aiosmtplib python-dotenv email-validator
+          
+          # Kill old mail service if running
+          pkill -f "uvicorn.*main:app" 2>/dev/null || true
+          sleep 2
+          
+          # Start mail service in background
+          nohup venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000 > mail.log 2>&1 &
+          echo $! > mail.pid
+          echo "Mail service started with PID $(cat mail.pid)"
+          
+          # ========== SPRING BOOT SETUP ==========
+          echo "=== Setting up Spring Boot ==="
           cd $HOME/app
           
           # Create deployment script on EC2
@@ -88,15 +127,21 @@ jobs:
           
           # Wait for startup
           echo "=== Waiting for application startup ==="
-          sleep 20
+          sleep 25
           
           # Check status
           if [ -f app.pid ] && ps -p $(cat app.pid) > /dev/null 2>&1; then
-            echo "=== SUCCESS: Application is running! ==="
+            echo "=== SUCCESS: Spring Boot is running! ==="
             tail -20 app.log
           else
             echo "=== FAILED: Application not running ==="
             cat app.log 2>/dev/null || echo "No log file"
             exit 1
           fi
-
+          
+          # Check mail service
+          if [ -f $HOME/mail_service/mail.pid ] && ps -p $(cat $HOME/mail_service/mail.pid) > /dev/null 2>&1; then
+            echo "=== Mail service is running! ==="
+          else
+            echo "=== WARNING: Mail service might not be running ==="
+          fi
