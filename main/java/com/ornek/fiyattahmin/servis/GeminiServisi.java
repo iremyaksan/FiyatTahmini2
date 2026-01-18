@@ -21,9 +21,27 @@ public class GeminiServisi {
     @Value("${gemini.api.url}")
     private String apiUrl;
 
+    // Fallback logic for API Key
+    private String getEffectiveApiKey() {
+        if (apiKey == null || apiKey.trim().isEmpty() || apiKey.startsWith("${")) {
+            String envKey = System.getenv("GEMINI_API_KEY");
+            if (envKey != null && !envKey.isEmpty()) {
+                System.out.println("✅ Using Gemini API Key from Environment Variable");
+                return envKey;
+            }
+            // Try Java System Property as well
+            String propKey = System.getProperty("gemini.api.key");
+            if (propKey != null && !propKey.isEmpty()) {
+                System.out.println("✅ Using Gemini API Key from System Property");
+                return propKey;
+            }
+        }
+        return apiKey;
+    }
+
     private final RestTemplate restTemplate;
     private final ObjectMapper nesneyeDonustur = new ObjectMapper();
-    
+
     private final Parser parser = Parser.builder().build();
     private final HtmlRenderer renderer = HtmlRenderer.builder().build();
 
@@ -31,40 +49,41 @@ public class GeminiServisi {
         this.restTemplate = restTemplate;
     }
 
-    public String fiyatTahminEt(String kategori, String marka, String modelUrun, int yil, 
-                                String durum, String hasarDurumu, String aciklama) {
-        
-    	String istekMetni = String.format(
-    		    "Sen uzman bir ekspertizsin. Kategori: %s, Marka: %s, Model: %s, Yıl: %d, Durum: %s, Hasar: %s, Not: %s " +
-    		    "bilgileri verilen ürün için tahmini bir piyasa fiyat aralığı ver ve kısa bir yorum yap. " +
-    		    "ÖNEMLI: Yanıtını düz metin olarak ver, Markdown formatı kullanma, yıldız (*) veya tire (-) işareti kullanma.",
-    		    kategori, marka, modelUrun, yil, durum, hasarDurumu, aciklama
-    		);
-        String urlWithKey = apiUrl + "?key=" + apiKey;
+    public String fiyatTahminEt(String kategori, String marka, String modelUrun, int yil,
+            String durum, String hasarDurumu, String aciklama) {
+
+        String istekMetni = String.format(
+                "Sen uzman bir ekspertizsin. Kategori: %s, Marka: %s, Model: %s, Yıl: %d, Durum: %s, Hasar: %s, Not: %s "
+                        +
+                        "bilgileri verilen ürün için tahmini bir piyasa fiyat aralığı ver ve kısa bir yorum yap. " +
+                        "ÖNEMLI: Yanıtını düz metin olarak ver, Markdown formatı kullanma, yıldız (*) veya tire (-) işareti kullanma.",
+                kategori, marka, modelUrun, yil, durum, hasarDurumu, aciklama);
+
+        String currentKey = getEffectiveApiKey();
+        if (currentKey == null || currentKey.startsWith("${")) {
+            return "AI HATASI: API Anahtarı bulunamadı. Lütfen sistem yöneticisi ile iletişime geçin.";
+        }
+
+        String urlWithKey = apiUrl + "?key=" + currentKey;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, Object> body = Map.of(
-            "contents", List.of(
-                Map.of(
-                    "parts", List.of(
-                        Map.of("text", istekMetni)
-                    )
-                )
-            )
-        );
+                "contents", List.of(
+                        Map.of(
+                                "parts", List.of(
+                                        Map.of("text", istekMetni)))));
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(
-                urlWithKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            
+                    urlWithKey,
+                    HttpMethod.POST,
+                    request,
+                    String.class);
+
             JsonNode root = nesneyeDonustur.readTree(response.getBody());
             String markdownSonuc = root
                     .path("candidates")
@@ -74,13 +93,15 @@ public class GeminiServisi {
                     .get(0)
                     .path("text")
                     .asText();
-            
+
             Node document = parser.parse(markdownSonuc);
             String htmlSonuc = renderer.render(document);
-            
+
             return htmlSonuc;
 
         } catch (Exception e) {
+            System.err.println("❌ Gemini AI Hatası: " + e.getMessage());
+            e.printStackTrace();
             return "AI HATASI: " + e.getMessage();
         }
     }
