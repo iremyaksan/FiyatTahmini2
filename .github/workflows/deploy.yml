@@ -22,7 +22,7 @@ jobs:
     
     - name: Inject API Key
       run: |
-        sed -i "s/REPLACE_ME_WITH_REAL_KEY/${{ secrets.GEMINI_API_KEY }}/g" src/main/java/com/ornek/fiyattahmin/servis/GeminiServisi.java
+        sed -i "s/REPLACE_ME_WITH_REAL_KEY/${{ secrets.GEMINI_API_KEY }}/g" main/java/com/ornek/fiyattahmin/servis/GeminiServisi.java
     
     - name: Build with Maven
       run: mvn clean package -DskipTests
