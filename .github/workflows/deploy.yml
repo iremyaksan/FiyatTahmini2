@@ -33,6 +33,15 @@ jobs:
         target: "/home/${{ secrets.EC2_USER }}"
         strip_components: 1
     
+    - name: Copy Mail Service to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "mail_service/"
+        target: "/home/${{ secrets.EC2_USER }}"
+    
     - name: Deploy on EC2
       env:
         SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -42,8 +51,33 @@ jobs:
         echo "$SSH_KEY" > /tmp/key.pem
         chmod 600 /tmp/key.pem
         
-        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 -i /tmp/key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
+        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i /tmp/key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
           echo "=== Starting deployment ==="
+          
+          # ===== MAIL SERVICE SETUP =====
+          echo "Setting up Mail Service..."
+          cd ~/mail_service
+          
+          # Create venv if not exists
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          
+          # Install dependencies
+          source venv/bin/activate
+          pip install -q fastapi uvicorn aiosmtplib python-dotenv email-validator
+          
+          # Kill old mail service
+          pkill -f "uvicorn.*main:app" 2>/dev/null || true
+          sleep 1
+          
+          # Start mail service
+          nohup venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000 > mail.log 2>&1 &
+          echo $! > mail.pid
+          echo "Mail service started with PID $(cat mail.pid)"
+          
+          # ===== SPRING BOOT SETUP =====
+          echo "Setting up Spring Boot..."
           mkdir -p ~/app
           [ -f ~/FiyatTahmin-0.0.1-SNAPSHOT.jar ] && mv ~/FiyatTahmin-0.0.1-SNAPSHOT.jar ~/app/
           cd ~/app
@@ -60,17 +94,24 @@ jobs:
           echo "Starting $JAR_FILE..."
           nohup java -jar "$JAR_FILE" > app.log 2>&1 &
           echo $! > app.pid
-          echo "Started with PID $(cat app.pid)"
+          echo "Spring Boot started with PID $(cat app.pid)"
           
-          sleep 10
+          sleep 15
           
+          # Check both services
+          echo "=== Checking Services ==="
           if ps -p $(cat app.pid) > /dev/null 2>&1; then
-            echo "SUCCESS!"
-            tail -10 app.log
+            echo "✅ Spring Boot is running!"
           else
-            echo "FAILED"
-            cat app.log
+            echo "❌ Spring Boot FAILED"
+            tail -20 app.log
             exit 1
+          fi
+          
+          if ps -p $(cat ~/mail_service/mail.pid) > /dev/null 2>&1; then
+            echo "✅ Mail service is running!"
+          else
+            echo "⚠️ Mail service might not be running"
           fi
         ENDSSH
         
