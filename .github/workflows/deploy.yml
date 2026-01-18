@@ -34,43 +34,44 @@ jobs:
         strip_components: 1
     
     - name: Deploy on EC2
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        timeout: 60s
-        command_timeout: 90s
-        script_stop: false
-        script: |
+      env:
+        SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+      run: |
+        echo "$SSH_KEY" > /tmp/key.pem
+        chmod 600 /tmp/key.pem
+        
+        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 -i /tmp/key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
           echo "=== Starting deployment ==="
+          mkdir -p ~/app
+          [ -f ~/FiyatTahmin-0.0.1-SNAPSHOT.jar ] && mv ~/FiyatTahmin-0.0.1-SNAPSHOT.jar ~/app/
+          cd ~/app
           
-          mkdir -p $HOME/app
-          
-          # Move JAR if exists
-          [ -f "$HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar" ] && mv $HOME/FiyatTahmin-0.0.1-SNAPSHOT.jar $HOME/app/
-          
-          cd $HOME/app
-          
-          # Kill old process
           pkill -f "java.*FiyatTahmin" 2>/dev/null || true
           sleep 2
           
-          # Start application
           JAR_FILE=$(ls -t *.jar 2>/dev/null | head -1)
-          [ -z "$JAR_FILE" ] && echo "No JAR!" && exit 1
+          if [ -z "$JAR_FILE" ]; then
+            echo "No JAR file found!"
+            exit 1
+          fi
           
           echo "Starting $JAR_FILE..."
           nohup java -jar "$JAR_FILE" > app.log 2>&1 &
           echo $! > app.pid
+          echo "Started with PID $(cat app.pid)"
           
           sleep 10
           
-          # Quick check
           if ps -p $(cat app.pid) > /dev/null 2>&1; then
-            echo "SUCCESS: PID $(cat app.pid) is running"
+            echo "SUCCESS!"
+            tail -10 app.log
           else
             echo "FAILED"
-            tail -30 app.log
+            cat app.log
             exit 1
           fi
+        ENDSSH
+        
+        rm -f /tmp/key.pem
