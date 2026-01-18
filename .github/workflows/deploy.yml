@@ -106,6 +106,7 @@ jobs:
           fi
           
           echo "Starting $JAR_FILE..."
+          export GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
           nohup java -jar "$JAR_FILE" > app.log 2>&1 &
           echo $! > app.pid
           echo "Spring Boot started with PID $(cat app.pid)"

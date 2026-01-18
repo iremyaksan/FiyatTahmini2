@@ -18,11 +18,16 @@ public class AnaSayfaKontrolcusu {
         this.ilanDeposu = ilanDeposu;
     }
 
-    @GetMapping("/") 
-    public String anaSayfa(Model model, 
-                           Principal principal, 
-                           @RequestParam(required = false) String arama,
-                           @RequestParam(required = false) String kategori) {
+    @GetMapping("/")
+    public String anaSayfa(Model model,
+            Principal principal,
+            @RequestParam(required = false) String arama,
+            @RequestParam(required = false) String kategori) {
+
+        // Eğer kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+        if (principal == null) {
+            return "redirect:/giris";
+        }
 
         List<Ilan> ilanlar;
 
@@ -35,21 +40,26 @@ public class AnaSayfaKontrolcusu {
         }
 
         model.addAttribute("ilanlar", ilanlar);
-        model.addAttribute("aktifKullanici", (principal != null) ? principal.getName() : "Misafir");
+        model.addAttribute("aktifKullanici", principal.getName());
 
-        return "panel"; 
+        return "panel";
     }
 
     @GetMapping("/giris")
-    public String girisSayfasi() { return "login"; }
+    public String girisSayfasi() {
+        return "login";
+    }
 
     @GetMapping("/ilan-ver")
-    public String ilanVerSayfasi() { return "ilan-ver"; }
+    public String ilanVerSayfasi() {
+        return "ilan-ver";
+    }
 
     @GetMapping("/ilan-detay")
     public String ilanDetay(@RequestParam Long id, Model model, Principal principal) {
         Ilan ilan = ilanDeposu.findById(id).orElse(null);
-        if (ilan == null) return "redirect:/";
+        if (ilan == null)
+            return "redirect:/";
         model.addAttribute("ilan", ilan);
         model.addAttribute("aktifKullanici", (principal != null) ? principal.getName() : "Misafir");
         return "ilan-detay";
