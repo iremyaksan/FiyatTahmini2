@@ -94,6 +94,52 @@ jobs:
           echo "Testing mail service..."
           curl -s http://localhost:8000/ || echo "Mail service not responding"
           
+          # ===== NGROK SETUP =====
+          echo "Setting up Ngrok..."
+          cd ~
+          
+          # Check if ngrok is already installed
+          if ! command -v ngrok &> /dev/null; then
+            echo "Installing ngrok..."
+            wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+            tar -xzf ngrok-v3-stable-linux-amd64.tgz
+            sudo mv ngrok /usr/local/bin/
+            rm ngrok-v3-stable-linux-amd64.tgz
+            echo "Ngrok installed successfully"
+          else
+            echo "Ngrok already installed"
+          fi
+          
+          ngrok version
+          
+          # Create systemd service file
+          echo "Creating ngrok systemd service..."
+          echo "[Unit]" | sudo tee /etc/systemd/system/ngrok.service
+          echo "Description=Ngrok Tunnel" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "After=network.target" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "[Service]" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "Type=simple" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "User=ubuntu" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "WorkingDirectory=/home/ubuntu" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "ExecStart=/usr/local/bin/ngrok http 8082 --log=stdout" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "Restart=always" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "RestartSec=10" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "[Install]" | sudo tee -a /etc/systemd/system/ngrok.service
+          echo "WantedBy=multi-user.target" | sudo tee -a /etc/systemd/system/ngrok.service
+          
+          sudo systemctl daemon-reload
+          echo "Ngrok service created successfully"
+          
+          echo "=== NEXT STEPS ==="
+          echo "Ngrok is installed but needs authtoken configuration."
+          echo "After deployment, run these commands on EC2:"
+          echo "  ngrok config add-authtoken YOUR_TOKEN"
+          echo "  sudo systemctl start ngrok"
+          echo "  sudo systemctl enable ngrok"
+          echo "  curl http://localhost:4040/api/tunnels"
+          
           # ===== SPRING BOOT SETUP =====
           echo "Setting up Spring Boot..."
           mkdir -p ~/app
