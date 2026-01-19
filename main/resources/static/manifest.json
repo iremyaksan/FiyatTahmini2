@@ -1,6 +1,7 @@
 {
   "name": "Fiyat Tahmin",
   "short_name": "FiyatTahmin",
+  "description": "Yapay zeka destekli fiyat tahmin ve ilan platformu",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f0f2f5",
