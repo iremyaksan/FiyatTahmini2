@@ -23,20 +23,23 @@ jobs:
           # Configure authtoken
           ngrok config add-authtoken 379np0NAuwaqIzuGFuJPEzm9fnG_37HgB5MprTL329GmNRj57
           
-          # Start and enable ngrok service
-          sudo systemctl start ngrok
-          sudo systemctl enable ngrok
+          # Kill any existing ngrok processes
+          pkill ngrok || true
+          
+          # Start ngrok in background
+          nohup ngrok http 8082 > /tmp/ngrok.log 2>&1 &
           
           # Wait for ngrok to start
-          sleep 5
+          echo "Waiting for ngrok to start..."
+          sleep 10
           
           # Get HTTPS URL
           echo "=== Ngrok HTTPS URL ==="
-          curl -s http://localhost:4040/api/tunnels | grep -o 'https://[^"]*' | head -1
+          curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url' || echo "Failed to get URL"
           
-          # Check service status
-          echo "=== Ngrok Service Status ==="
-          sudo systemctl status ngrok --no-pager
+          # Show ngrok process
+          echo "=== Ngrok Process ==="
+          ps aux | grep ngrok | grep -v grep
         ENDSSH
         
         rm -f /tmp/key.pem
