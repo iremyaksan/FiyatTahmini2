@@ -14,7 +14,6 @@ const api = axios.create({
 
 // API functions
 export const authAPI = {
-    // Kullanıcı kaydı
     register: async (username, email, password) => {
         const response = await api.post('/api/auth/register', {
             kullaniciAdi: username,
@@ -23,8 +22,6 @@ export const authAPI = {
         });
         return response.data;
     },
-
-    // Kullanıcı girişi
     login: async (username, password) => {
         const response = await api.post('/api/auth/login', {
             kullaniciAdi: username,
@@ -34,8 +31,72 @@ export const authAPI = {
     },
 };
 
+export const adminAPI = {
+    getStats: async () => {
+        const response = await api.get('/api/admin/istatistikler');
+        return response.data;
+    },
+    getUsers: async () => {
+        const response = await api.get('/api/admin/kullanicilar');
+        return response.data;
+    },
+    deleteUser: async (id) => {
+        const response = await api.delete(`/api/admin/kullanici-sil/${id}`);
+        return response.data;
+    },
+    getAds: async () => {
+        const response = await api.get('/api/admin/ilanlar');
+        return response.data;
+    },
+    deleteAd: async (id) => {
+        const response = await api.delete(`/api/admin/ilan-sil/${id}`);
+        return response.data;
+    },
+};
+
+export const ilanAPI = {
+    getAll: async (kategori) => {
+        const response = await api.get('/api/ilanlar/hepsi', { params: { kategori } });
+        return response.data;
+    },
+    getDetail: async (id) => {
+        const response = await api.get(`/api/ilanlar/${id}`);
+        return response.data;
+    },
+    getMyAds: async (userId) => {
+        const response = await api.get(`/api/ilanlar/benim/${userId}`);
+        return response.data;
+    },
+    create: async (formData) => {
+        const response = await api.post('/api/ilanlar/ekle', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+    delete: async (id) => {
+        const response = await api.delete(`/api/ilanlar/sil/${id}`);
+        return response.data;
+    },
+};
+
+export const messageAPI = {
+    getInbox: async (userId) => {
+        const response = await api.get(`/api/mesajlar/gelen-kutusu/${userId}`);
+        return response.data;
+    },
+    send: async (data) => {
+        const response = await api.post('/api/mesajlar/gonder-mobil', data);
+        return response.data;
+    },
+    delete: async (id) => {
+        const response = await api.delete(`/api/mesajlar/sil/${id}`);
+        return response.data;
+    },
+};
+
 export const predictionAPI = {
-    // Fiyat tahmini
     predict: async (data) => {
         const response = await api.post('/api/analiz/tahmin', data);
         return response.data;
@@ -43,23 +104,8 @@ export const predictionAPI = {
 };
 
 export const phoneAPI = {
-    // Telefon değerleme (Gemini API)
     evaluate: async (phoneData) => {
         const response = await api.post('/api/telefon-degerleme', phoneData);
         return response.data;
     },
 };
-
-export const mailAPI = {
-    // Mail gönderme
-    send: async (to, subject, message) => {
-        const response = await api.post('/api/mail/gonder', {
-            to,
-            subject,
-            message,
-        });
-        return response.data;
-    },
-};
-
-export default api;
