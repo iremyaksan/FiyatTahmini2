@@ -64,6 +64,7 @@ public class MobilAuthKontrolcusu {
                 response.put("message", "Giriş başarılı");
                 response.put("kullaniciAdi", kullanici.getKullaniciAdi());
                 response.put("rol", kullanici.getRol());
+                response.put("userId", kullanici.getId()); // ID eklendi
 
                 return ResponseEntity.ok(response);
             } else {
