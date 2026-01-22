@@ -37,7 +37,9 @@ export default function LoginScreen({ navigation }) {
 
     return (
         <LinearGradient
-            colors={['#4A90E2', '#357ABD']}
+            colors={['#0f2027', '#203a43', '#2c5364']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={styles.container}
         >
             <KeyboardAvoidingView
@@ -45,37 +47,53 @@ export default function LoginScreen({ navigation }) {
                 style={styles.keyboardView}
             >
                 <View style={styles.content}>
-                    <Text style={styles.title}>Hoş Geldiniz</Text>
-                    <Text style={styles.subtitle}>Doğru Fiyat, Hızlı Ticaret.</Text>
+                    <View style={styles.headerContainer}>
+                        <Text style={styles.emoji}>🚀</Text>
+                        <Text style={styles.title}>Fiyat Tahmini</Text>
+                        <Text style={styles.subtitle}>Giriş Yap ve Başla</Text>
+                    </View>
 
-                    <View style={styles.formContainer}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Kullanıcı Adı"
-                            placeholderTextColor="#999"
-                            value={username}
-                            onChangeText={setUsername}
-                            autoCapitalize="none"
-                        />
+                    <View style={styles.glassCard}>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>Kullanıcı Adı</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Kullanıcı adınızı girin"
+                                placeholderTextColor="rgba(255,255,255,0.4)"
+                                value={username}
+                                onChangeText={setUsername}
+                                autoCapitalize="none"
+                            />
+                        </View>
 
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Şifre"
-                            placeholderTextColor="#999"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                            autoCapitalize="none"
-                        />
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>Şifre</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Şifrenizi girin"
+                                placeholderTextColor="rgba(255,255,255,0.4)"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                                autoCapitalize="none"
+                            />
+                        </View>
 
                         <TouchableOpacity
                             style={styles.loginButton}
                             onPress={handleLogin}
                             disabled={loading}
                         >
-                            <Text style={styles.loginButtonText}>
-                                {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
-                            </Text>
+                            <LinearGradient
+                                colors={['#4facfe', '#00f2fe']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.gradientButton}
+                            >
+                                <Text style={styles.loginButtonText}>
+                                    {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
+                                </Text>
+                            </LinearGradient>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -83,7 +101,7 @@ export default function LoginScreen({ navigation }) {
                             style={styles.registerLink}
                         >
                             <Text style={styles.registerLinkText}>
-                                Hesabın yok mu? <Text style={styles.registerLinkBold}>Hemen Kayıt Ol</Text>
+                                Hesabın yok mu? <Text style={styles.registerLinkBold}>Kayıt Ol</Text>
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -106,63 +124,99 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
     },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#FFFFFF',
+    headerContainer: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    emoji: {
+        fontSize: 60,
         marginBottom: 10,
+    },
+    title: {
+        fontSize: 36,
+        fontWeight: '800',
+        color: '#FFFFFF',
+        letterSpacing: 1,
+        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 10,
     },
     subtitle: {
         fontSize: 16,
-        color: '#FFFFFF',
-        marginBottom: 40,
+        color: 'rgba(255, 255, 255, 0.7)',
+        marginTop: 5,
+        letterSpacing: 0.5,
     },
-    formContainer: {
+    glassCard: {
         width: '100%',
         maxWidth: 400,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 15,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 24,
         padding: 30,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
         shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 10,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    inputContainer: {
+        marginBottom: 20,
+    },
+    inputLabel: {
+        color: '#FFFFFF',
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8,
+        marginLeft: 4,
+    },
+    input: {
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        color: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    loginButton: {
+        marginTop: 10,
+        borderRadius: 12,
+        overflow: 'hidden',
+        shadowColor: '#4facfe',
         shadowOffset: {
             width: 0,
             height: 4,
         },
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
-        elevation: 8,
+        shadowOpacity: 0.5,
+        shadowRadius: 10,
+        elevation: 5,
     },
-    input: {
-        backgroundColor: '#F5F5F5',
-        borderRadius: 8,
-        padding: 15,
-        marginBottom: 15,
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-    },
-    loginButton: {
-        backgroundColor: '#4A90E2',
-        borderRadius: 8,
-        padding: 15,
+    gradientButton: {
+        paddingVertical: 16,
         alignItems: 'center',
-        marginTop: 10,
+        justifyContent: 'center',
     },
     loginButtonText: {
         color: '#FFFFFF',
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
+        letterSpacing: 0.5,
     },
     registerLink: {
-        marginTop: 20,
+        marginTop: 25,
         alignItems: 'center',
     },
     registerLinkText: {
-        color: '#666',
+        color: 'rgba(255, 255, 255, 0.6)',
         fontSize: 14,
     },
     registerLinkBold: {
-        color: '#4A90E2',
+        color: '#4facfe',
         fontWeight: 'bold',
     },
 });

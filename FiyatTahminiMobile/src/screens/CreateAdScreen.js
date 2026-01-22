@@ -9,11 +9,14 @@ import {
     Image,
     Alert,
     ActivityIndicator,
+    KeyboardAvoidingView, // Added for better UX
+    Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { ilanAPI } from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CreateAdScreen({ navigation }) {
     const [image, setImage] = useState(null);
@@ -99,183 +102,243 @@ export default function CreateAdScreen({ navigation }) {
             style={[styles.catButton, active && styles.catButtonActive]}
             onPress={() => setKategori(title)}
         >
-            <Text style={[styles.catText, active && styles.catTextActive]}>{title}</Text>
+            <LinearGradient
+                colors={active ? ['#4facfe', '#00f2fe'] : ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.catButtonGradient}
+            >
+                <Text style={[styles.catText, active && styles.catTextActive]}>{title}</Text>
+            </LinearGradient>
         </TouchableOpacity>
     );
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.headerTitle}>Yeni İlan Oluştur</Text>
-
-            {/* Resim Ekleme Alanı */}
-            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-                {image ? (
-                    <Image source={{ uri: image }} style={styles.image} />
-                ) : (
-                    <View style={styles.placeholder}>
-                        <Ionicons name="camera" size={40} color="#666" />
-                        <Text style={styles.placeholderText}>Fotoğraf Ekle</Text>
+        <LinearGradient
+            colors={['#0f2027', '#203a43', '#2c5364']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.container}
+        >
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={24} color="#FFF" />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>Yeni İlan Oluştur</Text>
                     </View>
-                )}
-            </TouchableOpacity>
 
-            <View style={styles.form}>
-                <Text style={styles.label}>Başlık</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Örn: iPhone 13 Pro Max"
-                    value={baslik}
-                    onChangeText={setBaslik}
-                />
+                    {/* Resim Ekleme Alanı */}
+                    <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+                        {image ? (
+                            <Image source={{ uri: image }} style={styles.image} />
+                        ) : (
+                            <View style={styles.placeholder}>
+                                <Ionicons name="camera" size={40} color="rgba(255,255,255,0.5)" />
+                                <Text style={styles.placeholderText}>Fotoğraf Ekle</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
 
-                <Text style={styles.label}>Fiyat (TL)</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Örn: 35000"
-                    keyboardType="numeric"
-                    value={fiyat}
-                    onChangeText={setFiyat}
-                />
-
-                <Text style={styles.label}>Kategori</Text>
-                <View style={styles.categories}>
-                    <CategoryButton title="Elektronik" active={kategori === 'Elektronik'} />
-                    <CategoryButton title="Vasıta" active={kategori === 'Vasıta'} />
-                    <CategoryButton title="Ev / Emlak" active={kategori === 'Ev / Emlak'} />
-                    <CategoryButton title="Giyim" active={kategori === 'Giyim'} />
-                </View>
-
-                <Text style={styles.label}>Açıklama</Text>
-                <TextInput
-                    style={[styles.input, styles.textArea]}
-                    placeholder="Ürün hakkında detaylı bilgi..."
-                    multiline
-                    numberOfLines={4}
-                    value={aciklama}
-                    onChangeText={setAciklama}
-                />
-
-                <Text style={styles.sectionTitle}>Konum Bilgileri</Text>
-                <View style={styles.row}>
-                    <View style={{ flex: 1, marginRight: 10 }}>
-                        <Text style={styles.label}>Şehir</Text>
+                    <View style={styles.glassCard}>
+                        <Text style={styles.label}>Başlık</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="İstanbul"
-                            value={sehir}
-                            onChangeText={setSehir}
+                            placeholder="Örn: iPhone 13 Pro Max"
+                            placeholderTextColor="rgba(255,255,255,0.4)"
+                            value={baslik}
+                            onChangeText={setBaslik}
                         />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.label}>İlçe</Text>
+
+                        <Text style={styles.label}>Fiyat (TL)</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="Kadıköy"
-                            value={ilce}
-                            onChangeText={setIlce}
+                            placeholder="Örn: 35000"
+                            placeholderTextColor="rgba(255,255,255,0.4)"
+                            keyboardType="numeric"
+                            value={fiyat}
+                            onChangeText={setFiyat}
                         />
+
+                        <Text style={styles.label}>Kategori</Text>
+                        <View style={styles.categories}>
+                            <CategoryButton title="Elektronik" active={kategori === 'Elektronik'} />
+                            <CategoryButton title="Vasıta" active={kategori === 'Vasıta'} />
+                            <CategoryButton title="Ev / Emlak" active={kategori === 'Ev / Emlak'} />
+                            <CategoryButton title="Giyim" active={kategori === 'Giyim'} />
+                        </View>
+
+                        <Text style={styles.label}>Açıklama</Text>
+                        <TextInput
+                            style={[styles.input, styles.textArea]}
+                            placeholder="Ürün hakkında detaylı bilgi..."
+                            placeholderTextColor="rgba(255,255,255,0.4)"
+                            multiline
+                            numberOfLines={4}
+                            value={aciklama}
+                            onChangeText={setAciklama}
+                        />
+
+                        <Text style={styles.sectionTitle}>Konum Bilgileri</Text>
+                        <View style={styles.row}>
+                            <View style={{ flex: 1, marginRight: 10 }}>
+                                <Text style={styles.label}>Şehir</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="İstanbul"
+                                    placeholderTextColor="rgba(255,255,255,0.4)"
+                                    value={sehir}
+                                    onChangeText={setSehir}
+                                />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.label}>İlçe</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Kadıköy"
+                                    placeholderTextColor="rgba(255,255,255,0.4)"
+                                    value={ilce}
+                                    onChangeText={setIlce}
+                                />
+                            </View>
+                        </View>
+
+                        <Text style={styles.label}>Adres Detayı</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Mahalle, sokak..."
+                            placeholderTextColor="rgba(255,255,255,0.4)"
+                            value={adres}
+                            onChangeText={setAdres}
+                        />
+
+                        <TouchableOpacity
+                            style={[styles.submitButton, loading && styles.disabledButton]}
+                            onPress={handleCreate}
+                            disabled={loading}
+                        >
+                            <LinearGradient
+                                colors={['#4facfe', '#00f2fe']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.submitButtonGradient}
+                            >
+                                {loading ? (
+                                    <ActivityIndicator color="#FFF" />
+                                ) : (
+                                    <Text style={styles.submitButtonText}>İlanı Yayınla</Text>
+                                )}
+                            </LinearGradient>
+                        </TouchableOpacity>
                     </View>
-                </View>
-
-                <Text style={styles.label}>Adres Detayı</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Mahalle, sokak..."
-                    value={adres}
-                    onChangeText={setAdres}
-                />
-
-                <TouchableOpacity
-                    style={[styles.submitButton, loading && styles.disabledButton]}
-                    onPress={handleCreate}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#FFF" />
-                    ) : (
-                        <Text style={styles.submitButtonText}>İlanı Yayınla</Text>
-                    )}
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+    },
+    scrollContent: {
         padding: 20,
+        paddingBottom: 50,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 20,
+        marginTop: 30,
+    },
+    backButton: {
+        marginRight: 15,
+        padding: 5,
     },
     headerTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
-        color: '#333',
-        marginTop: 30,
+        color: '#FFF',
     },
     imagePicker: {
         height: 200,
-        backgroundColor: '#F0F0F0',
-        borderRadius: 15,
-        marginBottom: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 20,
+        marginBottom: 25,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: 'rgba(255, 255, 255, 0.2)',
         borderStyle: 'dashed',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     image: {
         width: '100%',
         height: '100%',
     },
     placeholder: {
-        flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
     },
     placeholderText: {
         marginTop: 10,
-        color: '#666',
+        color: 'rgba(255,255,255,0.6)',
+        fontSize: 16,
     },
-    form: {
-        marginBottom: 50,
+    glassCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 24,
+        padding: 25,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     label: {
         fontSize: 14,
         fontWeight: '600',
-        marginBottom: 5,
-        color: '#333',
+        marginBottom: 8,
+        color: '#FFF',
+        marginLeft: 4,
     },
     input: {
-        backgroundColor: '#F9F9F9',
-        padding: 15,
-        borderRadius: 10,
-        marginBottom: 15,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 20,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        color: '#FFF',
+        fontSize: 16,
     },
     textArea: {
-        height: 100,
+        height: 120,
         textAlignVertical: 'top',
     },
     categories: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        marginBottom: 15,
+        marginBottom: 20,
+        gap: 10,
     },
     catButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 15,
         borderRadius: 20,
-        backgroundColor: '#F0F0F0',
-        marginRight: 10,
-        marginBottom: 10,
+        overflow: 'hidden',
     },
     catButtonActive: {
-        backgroundColor: '#4A90E2',
+        // gradient handles bg
+    },
+    catButtonGradient: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     catText: {
-        color: '#666',
+        color: 'rgba(255,255,255,0.7)',
+        fontWeight: '500',
     },
     catTextActive: {
         color: '#FFF',
@@ -286,24 +349,32 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 10,
         marginBottom: 15,
-        color: '#4A90E2',
+        color: '#4facfe',
     },
     row: {
         flexDirection: 'row',
     },
     submitButton: {
-        backgroundColor: '#4A90E2',
+        marginTop: 10,
+        borderRadius: 15,
+        overflow: 'hidden',
+        shadowColor: '#4facfe',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10,
+        elevation: 6,
+    },
+    submitButtonGradient: {
         padding: 18,
-        borderRadius: 12,
         alignItems: 'center',
-        marginTop: 20,
     },
     disabledButton: {
-        backgroundColor: '#A0C4E8',
+        opacity: 0.7,
     },
     submitButtonText: {
         color: '#FFF',
         fontSize: 18,
         fontWeight: 'bold',
+        letterSpacing: 0.5,
     },
 });

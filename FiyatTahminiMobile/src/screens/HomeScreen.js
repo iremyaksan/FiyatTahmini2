@@ -10,41 +10,75 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export default function HomeScreen({ navigation }) {
     return (
-        <LinearGradient colors={['#4A90E2', '#357ABD']} style={styles.container}>
+        <LinearGradient
+            colors={['#0f2027', '#203a43', '#2c5364']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.container}
+        >
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Fiyat Tahmin Platformu</Text>
-                    <Text style={styles.subtitle}>Doğru Fiyat, Hızlı Ticaret</Text>
+                    <View style={styles.headerContainer}>
+                        <Text style={styles.headerEmoji}>📊</Text>
+                        <Text style={styles.title}>Fiyat Tahmin</Text>
+                        <Text style={styles.subtitle}>Doğru Fiyat, Hızlı Ticaret</Text>
+                    </View>
 
                     <View style={styles.menuContainer}>
                         <TouchableOpacity
-                            style={styles.menuButton}
+                            style={styles.menuCard}
                             onPress={() => navigation.navigate('PricePrediction')}
                         >
-                            <Text style={styles.menuButtonIcon}>📊</Text>
-                            <Text style={styles.menuButtonText}>Fiyat Tahmini</Text>
-                            <Text style={styles.menuButtonSubtext}>Ürün fiyatını tahmin et</Text>
+                            <LinearGradient
+                                colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+                                style={styles.glassInner}
+                            >
+                                <View style={[styles.iconContainer, { backgroundColor: 'rgba(79, 172, 254, 0.2)' }]}>
+                                    <Text style={styles.menuButtonIcon}>💹</Text>
+                                </View>
+                                <View style={styles.textContainer}>
+                                    <Text style={styles.menuButtonText}>Fiyat Tahmini</Text>
+                                    <Text style={styles.menuButtonSubtext}>Yapay zeka ile ürün fiyatını öğren</Text>
+                                </View>
+                                <Text style={styles.arrowIcon}>→</Text>
+                            </LinearGradient>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={styles.menuButton}
+                            style={styles.menuCard}
                             onPress={() => navigation.navigate('PhoneEvaluation')}
                         >
-                            <Text style={styles.menuButtonIcon}>📱</Text>
-                            <Text style={styles.menuButtonText}>Telefon Değerleme</Text>
-                            <Text style={styles.menuButtonSubtext}>AI ile telefon değerlendir</Text>
+                            <LinearGradient
+                                colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+                                style={styles.glassInner}
+                            >
+                                <View style={[styles.iconContainer, { backgroundColor: 'rgba(246, 79, 89, 0.2)' }]}>
+                                    <Text style={styles.menuButtonIcon}>📱</Text>
+                                </View>
+                                <View style={styles.textContainer}>
+                                    <Text style={styles.menuButtonText}>Telefon Değerleme</Text>
+                                    <Text style={styles.menuButtonSubtext}>Telefonunun gerçek değerini bul</Text>
+                                </View>
+                                <Text style={styles.arrowIcon}>→</Text>
+                            </LinearGradient>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={styles.menuButton}
-                            onPress={() => {
-                                // Çıkış yap
-                                navigation.replace('Login');
-                            }}
+                            style={styles.menuCard}
+                            onPress={() => navigation.replace('Login')}
                         >
-                            <Text style={styles.menuButtonIcon}>🚪</Text>
-                            <Text style={styles.menuButtonText}>Çıkış Yap</Text>
-                            <Text style={styles.menuButtonSubtext}>Hesaptan çık</Text>
+                            <LinearGradient
+                                colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+                                style={styles.glassInner}
+                            >
+                                <View style={[styles.iconContainer, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}>
+                                    <Text style={styles.menuButtonIcon}>🚪</Text>
+                                </View>
+                                <View style={styles.textContainer}>
+                                    <Text style={styles.menuButtonText}>Çıkış Yap</Text>
+                                    <Text style={styles.menuButtonSubtext}>Oturumu sonlandır</Text>
+                                </View>
+                            </LinearGradient>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -65,48 +99,80 @@ const styles = StyleSheet.create({
         padding: 20,
         paddingTop: 60,
     },
+    headerContainer: {
+        marginBottom: 40,
+        alignItems: 'center',
+    },
+    headerEmoji: {
+        fontSize: 48,
+        marginBottom: 10,
+    },
     title: {
-        fontSize: 28,
-        fontWeight: 'bold',
+        fontSize: 32,
+        fontWeight: '800',
         color: '#FFFFFF',
         textAlign: 'center',
-        marginBottom: 10,
+        letterSpacing: 1,
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 10,
     },
     subtitle: {
         fontSize: 16,
-        color: '#FFFFFF',
+        color: 'rgba(255, 255, 255, 0.7)',
         textAlign: 'center',
-        marginBottom: 40,
+        marginTop: 5,
+        letterSpacing: 0.5,
     },
     menuContainer: {
         gap: 20,
     },
-    menuButton: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 15,
-        padding: 25,
-        alignItems: 'center',
+    menuCard: {
+        borderRadius: 20,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
             height: 4,
         },
         shadowOpacity: 0.3,
-        shadowRadius: 4.65,
-        elevation: 8,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    glassInner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 20,
+    },
+    iconContainer: {
+        width: 60,
+        height: 60,
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
     },
     menuButtonIcon: {
-        fontSize: 48,
-        marginBottom: 10,
+        fontSize: 30,
+    },
+    textContainer: {
+        flex: 1,
     },
     menuButtonText: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 5,
+        color: '#FFFFFF',
+        marginBottom: 4,
     },
     menuButtonSubtext: {
-        fontSize: 14,
-        color: '#666',
+        fontSize: 13,
+        color: 'rgba(255, 255, 255, 0.7)',
+    },
+    arrowIcon: {
+        fontSize: 24,
+        color: 'rgba(255, 255, 255, 0.5)',
+        fontWeight: 'bold',
     },
 });

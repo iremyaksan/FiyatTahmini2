@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ilanAPI } from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function MyAdsScreen({ navigation }) {
     const [ads, setAds] = useState([]);
@@ -63,7 +64,7 @@ export default function MyAdsScreen({ navigation }) {
     };
 
     const renderAd = ({ item }) => (
-        <View style={styles.card}>
+        <View style={styles.glassCard}>
             <Image
                 source={{
                     uri: item.resimYolu && !item.resimYolu.includes('default')
@@ -84,16 +85,25 @@ export default function MyAdsScreen({ navigation }) {
                         style={[styles.actionButton, styles.detailButton]}
                         onPress={() => navigation.navigate('AdDetail', { id: item.id })}
                     >
-                        <Ionicons name="eye-outline" size={20} color="#FFF" />
-                        <Text style={styles.actionText}>İncele</Text>
+                        <LinearGradient
+                            colors={['#4facfe', '#00f2fe']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.gradientButton}
+                        >
+                            <Ionicons name="eye-outline" size={18} color="#FFF" />
+                            <Text style={styles.actionText}>İncele</Text>
+                        </LinearGradient>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={[styles.actionButton, styles.deleteButton]}
+                        style={[styles.actionButton, styles.deleteButtonContainer]}
                         onPress={() => handleDelete(item.id)}
                     >
-                        <Ionicons name="trash-outline" size={20} color="#FFF" />
-                        <Text style={styles.actionText}>Sil</Text>
+                        <View style={styles.deleteButton}>
+                            <Ionicons name="trash-outline" size={18} color="#FFF" />
+                            <Text style={styles.actionText}>Sil</Text>
+                        </View>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -101,16 +111,21 @@ export default function MyAdsScreen({ navigation }) {
     );
 
     return (
-        <View style={styles.container}>
+        <LinearGradient
+            colors={['#0f2027', '#203a43', '#2c5364']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.container}
+        >
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#333" />
+                    <Ionicons name="arrow-back" size={24} color="#FFF" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>İlanlarım</Text>
             </View>
 
             {loading ? (
-                <ActivityIndicator size="large" color="#4A90E2" style={{ marginTop: 20 }} />
+                <ActivityIndicator size="large" color="#4facfe" style={{ marginTop: 20 }} />
             ) : (
                 <FlatList
                     data={ads}
@@ -119,61 +134,71 @@ export default function MyAdsScreen({ navigation }) {
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Ionicons name="documents-outline" size={50} color="#CCC" />
+                            <Ionicons name="documents-outline" size={60} color="rgba(255,255,255,0.3)" />
                             <Text style={styles.emptyText}>Henüz ilanınız yok.</Text>
                             <TouchableOpacity
                                 style={styles.createButton}
                                 onPress={() => navigation.navigate('CreateAd')}
                             >
-                                <Text style={styles.createButtonText}>Hemen İlan Ver</Text>
+                                <LinearGradient
+                                    colors={['#4facfe', '#00f2fe']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    style={styles.createButtonGradient}
+                                >
+                                    <Text style={styles.createButtonText}>Hemen İlan Ver</Text>
+                                </LinearGradient>
                             </TouchableOpacity>
                         </View>
                     }
                 />
             )}
-        </View>
+        </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F5F5',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: '#FFF',
         paddingTop: 50,
         borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
+        borderBottomColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(0,0,0,0.2)',
     },
     backButton: {
         marginRight: 15,
+        padding: 5,
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#FFF',
+        letterSpacing: 0.5,
     },
     listContent: {
-        padding: 15,
+        padding: 20,
     },
-    card: {
-        backgroundColor: '#FFF',
-        borderRadius: 15,
-        marginBottom: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
+    glassCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 20,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
         overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
     },
     cardImage: {
         width: '100%',
-        height: 150,
+        height: 180,
         resizeMode: 'cover',
     },
     cardContent: {
@@ -183,42 +208,53 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 5,
+        marginBottom: 8,
     },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#FFF',
         flex: 1,
         marginRight: 10,
     },
     price: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#4ECDC4',
+        color: '#4facfe',
     },
     date: {
         fontSize: 14,
-        color: '#999',
+        color: 'rgba(255,255,255,0.6)',
         marginBottom: 15,
     },
     actionRow: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
+        gap: 10,
     },
     actionButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 8,
-        marginLeft: 10,
+        borderRadius: 12,
+        overflow: 'hidden',
     },
     detailButton: {
-        backgroundColor: '#4A90E2',
+        // gradient handles bg
+    },
+    deleteButtonContainer: {
+        // bg handled by inner view
     },
     deleteButton: {
-        backgroundColor: '#FF6B6B',
+        backgroundColor: 'rgba(255, 59, 48, 0.8)', // Red
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 12,
+    },
+    gradientButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
     },
     actionText: {
         color: '#FFF',
@@ -228,19 +264,26 @@ const styles = StyleSheet.create({
     },
     emptyContainer: {
         alignItems: 'center',
-        marginTop: 50,
+        marginTop: 60,
     },
     emptyText: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#999',
-        marginBottom: 20,
+        marginTop: 15,
+        fontSize: 18,
+        color: 'rgba(255,255,255,0.5)',
+        marginBottom: 30,
     },
     createButton: {
-        backgroundColor: '#4A90E2',
-        paddingVertical: 12,
-        paddingHorizontal: 30,
         borderRadius: 25,
+        overflow: 'hidden',
+        shadowColor: '#4facfe',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    createButtonGradient: {
+        paddingVertical: 15,
+        paddingHorizontal: 35,
     },
     createButtonText: {
         color: '#FFF',

@@ -13,6 +13,7 @@ import {
 import { ilanAPI } from '../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AdDetailScreen({ route, navigation }) {
     const { id } = route.params;
@@ -59,90 +60,114 @@ export default function AdDetailScreen({ route, navigation }) {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#4A90E2" />
+                <ActivityIndicator size="large" color="#4facfe" />
             </View>
         );
     }
 
     return (
-        <ScrollView style={styles.container}>
-            {/* Resim */}
-            <Image
-                source={{
-                    uri: ad.resimYolu && !ad.resimYolu.includes('default')
-                        ? `https://glandular-nonopprobrious-kairi.ngrok-free.dev/uploads/images/${ad.resimYolu}`
-                        : 'https://via.placeholder.com/400'
-                }}
-                style={styles.image}
-            />
-
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={24} color="#FFF" />
-            </TouchableOpacity>
-
-            {/* İçerik */}
-            <View style={styles.content}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>{ad.baslik}</Text>
-                    <Text style={styles.price}>{ad.fiyat} ₺</Text>
+        <LinearGradient
+            colors={['#0f2027', '#203a43', '#2c5364']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.container}
+        >
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                {/* Resim */}
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={{
+                            uri: ad.resimYolu && !ad.resimYolu.includes('default')
+                                ? `https://glandular-nonopprobrious-kairi.ngrok-free.dev/uploads/images/${ad.resimYolu}`
+                                : 'https://via.placeholder.com/400'
+                        }}
+                        style={styles.image}
+                    />
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                        <Ionicons name="arrow-back" size={24} color="#FFF" />
+                    </TouchableOpacity>
                 </View>
 
-                <View style={styles.infoRow}>
-                    <View style={styles.infoItem}>
-                        <Ionicons name="location-outline" size={20} color="#666" />
-                        <Text style={styles.infoText}>{ad.sehir} / {ad.ilce}</Text>
+                {/* İçerik */}
+                <View style={styles.glassContent}>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>{ad.baslik}</Text>
+                        <Text style={styles.price}>{ad.fiyat} ₺</Text>
                     </View>
-                    <View style={styles.infoItem}>
-                        <Ionicons name="calendar-outline" size={20} color="#666" />
-                        <Text style={styles.infoText}>Bugün</Text>
+
+                    <View style={styles.infoRow}>
+                        <View style={styles.infoItem}>
+                            <Ionicons name="location-outline" size={20} color="rgba(255,255,255,0.7)" />
+                            <Text style={styles.infoText}>{ad.sehir} / {ad.ilce}</Text>
+                        </View>
+                        <View style={styles.infoItem}>
+                            <Ionicons name="calendar-outline" size={20} color="rgba(255,255,255,0.7)" />
+                            <Text style={styles.infoText}>Bugün</Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.divider} />
+
+                    <Text style={styles.sectionTitle}>Açıklama</Text>
+                    <Text style={styles.description}>{ad.aciklama}</Text>
+
+                    <View style={styles.divider} />
+
+                    <Text style={styles.sectionTitle}>Satıcı Bilgileri</Text>
+                    <View style={styles.sellerContainer}>
+                        <View style={styles.avatar}>
+                            <Text style={styles.avatarText}>
+                                {ad.kullanici?.kullaniciAdi?.charAt(0).toUpperCase()}
+                            </Text>
+                        </View>
+                        <View>
+                            <Text style={styles.sellerName}>{ad.kullanici?.kullaniciAdi}</Text>
+                            <Text style={styles.sellerRole}>Üye</Text>
+                        </View>
                     </View>
                 </View>
+            </ScrollView>
 
-                <View style={styles.divider} />
-
-                <Text style={styles.sectionTitle}>Açıklama</Text>
-                <Text style={styles.description}>{ad.aciklama}</Text>
-
-                <View style={styles.divider} />
-
-                <Text style={styles.sectionTitle}>Satıcı Bilgileri</Text>
-                <View style={styles.sellerContainer}>
-                    <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>
-                            {ad.kullanici?.kullaniciAdi?.charAt(0).toUpperCase()}
-                        </Text>
-                    </View>
-                    <View>
-                        <Text style={styles.sellerName}>{ad.kullanici?.kullaniciAdi}</Text>
-                        <Text style={styles.sellerRole}>Üye</Text>
-                    </View>
-                </View>
-            </View>
-
-            {/* Aksiyon Butonları */}
+            {/* Aksiyon Butonları Flat Footer */}
             <View style={styles.footer}>
-                <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]} onPress={handleCall}>
-                    <Ionicons name="call-outline" size={24} color="#4A90E2" />
-                    <Text style={[styles.actionText, { color: '#4A90E2' }]}>Ara</Text>
+                <TouchableOpacity style={styles.footerButtonContainer} onPress={handleCall}>
+                    <View style={[styles.actionButton, styles.secondaryButton]}>
+                        <Ionicons name="call-outline" size={24} color="#4facfe" />
+                        <Text style={[styles.actionText, { color: '#4facfe' }]}>Ara</Text>
+                    </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.actionButton, styles.primaryButton]} onPress={handleMessage}>
-                    <Ionicons name="chatbubble-outline" size={24} color="#FFF" />
-                    <Text style={styles.actionText}>Mesaj Gönder</Text>
+
+                <TouchableOpacity style={styles.footerButtonContainer} onPress={handleMessage}>
+                    <LinearGradient
+                        colors={['#4facfe', '#00f2fe']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={[styles.actionButton, styles.primaryButtonGradient]}
+                    >
+                        <Ionicons name="chatbubble-outline" size={24} color="#FFF" />
+                        <Text style={styles.actionText}>Mesaj Gönder</Text>
+                    </LinearGradient>
                 </TouchableOpacity>
             </View>
-        </ScrollView>
+        </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFF',
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#0f2027',
+    },
+    scrollContent: {
+        paddingBottom: 100, // Footer için yer
+    },
+    imageContainer: {
+        position: 'relative',
     },
     image: {
         width: '100%',
@@ -157,66 +182,81 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 20,
     },
-    content: {
-        padding: 20,
-        paddingBottom: 100, // Footer için yer
+    glassContent: {
+        marginTop: -30,
+        backgroundColor: 'rgba(23, 42, 51, 0.95)', // Slightly opaque for readability over text
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        padding: 25,
+        minHeight: 500,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -5 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 10,
     },
     header: {
         marginBottom: 20,
     },
     title: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 5,
+        color: '#FFF',
+        marginBottom: 8,
     },
     price: {
-        fontSize: 28,
+        fontSize: 30,
         fontWeight: 'bold',
-        color: '#4A90E2',
+        color: '#4facfe',
     },
     infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 20,
+        marginBottom: 25,
     },
     infoItem: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        padding: 10,
+        borderRadius: 12,
     },
     infoText: {
-        marginLeft: 5,
-        color: '#666',
-        fontSize: 16,
+        marginLeft: 8,
+        color: 'rgba(255,255,255,0.8)',
+        fontSize: 15,
+        fontWeight: '500',
     },
     divider: {
         height: 1,
-        backgroundColor: '#F0F0F0',
-        marginBottom: 20,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        marginBottom: 25,
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#333',
+        marginBottom: 12,
+        color: '#4facfe',
     },
     description: {
         fontSize: 16,
-        color: '#555',
+        color: 'rgba(255,255,255,0.8)',
         lineHeight: 24,
     },
     sellerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F9F9F9',
+        backgroundColor: 'rgba(255,255,255,0.05)',
         padding: 15,
-        borderRadius: 10,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
     },
     avatar: {
         width: 50,
         height: 50,
         borderRadius: 25,
-        backgroundColor: '#4A90E2',
+        backgroundColor: '#4facfe',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 15,
@@ -229,40 +269,42 @@ const styles = StyleSheet.create({
     sellerName: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#FFF',
     },
     sellerRole: {
         fontSize: 14,
-        color: '#999',
+        color: 'rgba(255,255,255,0.6)',
     },
     footer: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#FFF',
+        backgroundColor: 'rgba(15, 32, 39, 0.9)',
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
+        borderTopColor: 'rgba(255,255,255,0.1)',
         padding: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    actionButton: {
+    footerButtonContainer: {
         flex: 1,
+        marginHorizontal: 5,
+    },
+    actionButton: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 15,
-        borderRadius: 12,
-        marginHorizontal: 5,
+        padding: 16,
+        borderRadius: 15,
     },
-    primaryButton: {
-        backgroundColor: '#4A90E2',
+    primaryButtonGradient: {
+        // gradient
     },
     secondaryButton: {
-        backgroundColor: '#F0F5FF',
+        backgroundColor: 'rgba(255,255,255,0.05)',
         borderWidth: 1,
-        borderColor: '#4A90E2',
+        borderColor: '#4facfe',
     },
     actionText: {
         color: '#FFF',
